@@ -18,6 +18,7 @@ public class Planet {
 	ModelBuilder modelBuilder;
 	Model model;
 	ModelInstance shape;
+	Material material;
 	
 	public Planet() {
 		sprite = new Sprite(Consts.atlas.findRegion("circle"));
@@ -25,14 +26,14 @@ public class Planet {
 		gravity = 0.2f;
 
 		modelBuilder = new ModelBuilder();
+		material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 		setRadius(100);
 	}
 	
 	public void setRadius(float radius) {
 		this.radius = radius;
 		model = modelBuilder.createSphere(radius * 2, radius * 2, radius * 2, 60, 30,
-				new Material(ColorAttribute.createDiffuse(Color.CYAN)),
-				Usage.Position | Usage.Normal | Usage.TextureCoordinates);
+				material, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
 		
 		shape = new ModelInstance(model);
 		sprite.setSize(radius * 2, radius * 2);

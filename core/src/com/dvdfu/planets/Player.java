@@ -15,11 +15,11 @@ public class Player {
 	Planet planet;
 	
 	public Player(Planet p) {
-		sprite = new Sprite(Consts.atlas.findRegion("circle"));
-		sprite.setSize(16, 16);
-		shadow = new Sprite(Consts.atlas.findRegion("circle"));
-		shadow.setSize(16, 16);
+		sprite = new Sprite(Consts.atlas.findRegion("player"));
+		shadow = new Sprite(Consts.atlas.findRegion("player"));
 		shadow.setColor(0, 0, 0);
+		shadow.setSize(8, 4);
+		shadow.setOrigin(4, 2);
 		pos = new Vector2(400, 400);
 		planet = p;
 		speed = new Vector2();
@@ -32,9 +32,9 @@ public class Player {
 		dist = pos.cpy().sub(planet.pos).len() - planet.radius;
 		
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			move.x = MathUtils.lerp(move.x, 3, 0.1f);
+			move.x = MathUtils.lerp(move.x, 2, 0.1f);
 		} else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			move.x = MathUtils.lerp(move.x, -3, 0.1f);
+			move.x = MathUtils.lerp(move.x, -2, 0.1f);
 		} else {
 			move.x = MathUtils.lerp(move.x, 0, 0.2f);
 		}
@@ -61,7 +61,9 @@ public class Player {
 	}
 	
 	public void draw(SpriteBatch batch) {
-		Vector2 shadowPos = planet.pos.cpy().add(up.cpy().setLength(planet.radius - 4));
+		sprite.setAngle(up.angle() - 90);
+		shadow.setAngle(up.angle() - 90);
+		Vector2 shadowPos = planet.pos.cpy().add(up.cpy().setLength(planet.radius - 8));
 		shadow.drawCentered(batch, shadowPos.x, shadowPos.y);
 		sprite.drawCentered(batch, pos.x, pos.y);
 	}

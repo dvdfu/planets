@@ -11,7 +11,9 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.dvdfu.lib.Sprite;
 
 public class MainGame extends ApplicationAdapter {
 	SpriteBatch batch;
@@ -21,31 +23,19 @@ public class MainGame extends ApplicationAdapter {
 	Vector2 lerpPos, lerpAng;
 	Environment e;
 	ModelBatch models;
+	Sprite star;
+	ArrayList<Star> stars;
 	
 	public void create () {
 		new Consts();
 		batch = new SpriteBatch();
 		planets = new ArrayList<Planet>();
 		
-		Planet p = new Planet();
-		p.pos.set(300, 200);
-		p.setRadius(100);
-		planets.add(p);
-		
-		p = new Planet();
-		p.pos.set(0, 100);
-		p.setRadius(60);
-		planets.add(p);
-		
-		p = new Planet();
-		p.pos.set(300, 100);
-		p.setRadius(60);
-		planets.add(p);
-		
-		for (int i = 0; i < 5; i++) {
+		Planet p;
+		for (int i = 0; i < 10; i++) {
 			p = new Planet();
-			p.pos.set(500, 300 - i * 150);
-			p.setRadius(30);
+			p.pos.set(MathUtils.random(-400, 400), MathUtils.random(-400, 400));
+			p.setRadius(MathUtils.random(30, 100));
 			planets.add(p);
 		}
 		
@@ -58,9 +48,15 @@ public class MainGame extends ApplicationAdapter {
 		
 		e = new Environment();
 		e.set(new ColorAttribute(ColorAttribute.AmbientLight, 0, 0, 0, 1f));
-		e.add(new DirectionalLight().set(0.95f, 0.9f, 0.75f, -1.5f, -1f, -0.5f));
-		e.add(new DirectionalLight().set(0.11f, 0.08f, 0.14f, 1.5f, 1.0f, 0.5f)); // direct light
+		e.add(new DirectionalLight().set(0.95f, 0.9f, 0.75f, -1.5f, -1f, -3f));
+		e.add(new DirectionalLight().set(0.11f, 0.08f, 0.14f, 1.5f, 1.0f, 0.5f));
 		models = new ModelBatch();
+		
+		star = new Sprite(Consts.atlas.findRegion("circle"));
+		stars = new ArrayList<Star>();
+		for (int i = 0; i < 2000; i++) {
+			stars.add(new Star());
+		}
 	}
 
 	public void render () {
@@ -85,6 +81,16 @@ public class MainGame extends ApplicationAdapter {
 		for (Planet planet : planets) {
 			planet.update();
 		}
+		for (Star s : stars) {
+			s.move(player.speed);
+		}
+		
+		batch.setProjectionMatrix(cam.combined);
+		batch.begin();
+		for (Star s : stars) {
+			s.draw(batch);
+		}
+		batch.end();
 
 		models.begin(cam);
 		for (Planet p : planets) {
@@ -92,7 +98,6 @@ public class MainGame extends ApplicationAdapter {
 		}
 		models.end();
 		
-		batch.setProjectionMatrix(cam.combined);
 		batch.begin();
 		player.draw(batch);
 		batch.end();

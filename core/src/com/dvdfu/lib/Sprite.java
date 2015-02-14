@@ -62,8 +62,12 @@ public class Sprite {
 		this.alpha = alpha;
 	}
 	
+	public void setAngleRad(float angle) {
+		setAngle(angle * MathUtils.radDeg);
+	}
+	
 	public void setAngle(float angle) {
-		this.angle = angle * MathUtils.radDeg;
+		this.angle = angle;
 	}
 	
 	public void setAnimates(boolean animates) {
@@ -119,5 +123,9 @@ public class Sprite {
 	public void setSize(float width, float height) {
 		this.width = width;
 		this.height = height;
+	}
+	
+	public float getAngle() {
+		return angle;
 	}
 }
