@@ -75,7 +75,6 @@ public class MainGame extends ApplicationAdapter {
 		Planet c = planets.get(0);
 		float d = Integer.MAX_VALUE;
 		for (Planet p : planets) {
-			System.out.println("planet is " + p.distance(player) + " away");
 			if (p.distance(player) < d) {
 				d = p.distance(player);
 				c = p;
