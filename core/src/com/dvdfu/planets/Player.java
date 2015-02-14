@@ -3,63 +3,65 @@ package com.dvdfu.planets;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.dvdfu.lib.Sprite;
 
 public class Player {
 	Sprite sprite;
-	float angle, dist;
-	Vector2 pos, speed, up, a;
+	float dist;
+	Vector2 pos, speed, up;
 	boolean grounded;
 	Planet planet;
 	
 	public Player(Planet p) {
 		sprite = new Sprite(Consts.atlas.findRegion("circle"));
 		sprite.setSize(16, 16);
-		pos = new Vector2();
-		angle = 0;
-		dist = 100;
+		pos = new Vector2(400, 400);
+		dist = 500;
 		planet = p;
 		speed = new Vector2();
-		up = new Vector2(1, 1);
-		a = new Vector2();
+		up = new Vector2();
+		sprite.setColor(1, 0, 0);
 	}
 	
 	public void update() {
-		up.setLength(1);
-		up.setAngleRad(angle);
-		a.set(up.cpy().setLength(dist));
-		pos.set(planet.pos.cpy().add(a));
+		up.set(pos.cpy().sub(planet.pos).nor());
+		dist = pos.cpy().sub(planet.pos).len();
 		
 		if (grounded) {
+			pos.set(planet.pos.cpy().add(up.cpy().scl(planet.radius)));
+			speed.setZero();
 			if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-				speed.y = 5;
+				speed.set(up.cpy().scl(5));
 				grounded = false;
 			}
 		} else {
-			if (dist + speed.y < planet.radius) {
-				dist = planet.radius;
-				speed.y = 0;
-				grounded = true;
+			if (pos.cpy().add(speed).sub(planet.pos).len() > planet.radius) {
+				speed.sub(up.cpy().scl(0.1f));
+				pos.add(speed);
 			} else {
-				speed.y -= planet.gravity;
-				dist += speed.y;
+				pos.set(planet.pos.cpy().add(up.cpy().scl(planet.radius)));
+				speed.setZero();
+				grounded = true;
 			}
 		}
 		
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			speed.x = 3;
+			pos.add(up.cpy().rotate(-90).scl(3));
 		} else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			speed.x = -3;
-		} else {
-			speed.lerp(new Vector2(0, speed.y), 0.1f);
+			pos.add(up.cpy().rotate(90).scl(3));
 		}
-		
-		angle -= speed.x / planet.radius;
 	}
 	
 	public void draw(SpriteBatch batch) {
 		sprite.drawCentered(batch, pos.x, pos.y);
+	}
+	
+	public void switchPlanet(Planet planet) {
+		if (this.planet.equals(planet)) {
+			return;
+		}
+		
+		this.planet = planet;
 	}
 }
