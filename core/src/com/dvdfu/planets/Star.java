@@ -19,11 +19,14 @@ public class Star {
 	}
 	
 	public void draw(SpriteBatch batch) {
+		float r = MathUtils.random() * 2 - 1;
+		sprite.setSize(sprite.getWidth() + r, sprite.getHeight() + r);
 		sprite.drawCentered(batch, x, y);
+		sprite.setSize(sprite.getWidth() - r, sprite.getHeight() - r);
 	}
 	
 	public void move(Vector2 d) {
-		x += d.x / depth;
-		y += d.y / depth;
+		x -= d.x / depth;
+		y -= d.y / depth;
 	}
 }

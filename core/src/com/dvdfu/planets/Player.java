@@ -28,6 +28,35 @@ public class Player {
 	}
 	
 	public void update() {
+//		up.set(pos.cpy().sub(planet.pos));
+//		dist = pos.cpy().sub(planet.pos).len() - planet.radius;
+//		
+//		if (grounded) {
+//			pos.set(planet.pos.cpy().add(up.cpy().setLength(planet.radius)));
+//			speed.setZero();
+//			
+//			if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+//				move.add(up.cpy().rotate(-90).setLength(2));
+//			} else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+//				move.add(up.cpy().rotate(90).setLength(2));
+//			}
+//			
+//			if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+//				speed.set(up.cpy().setLength(8));
+//				grounded = false;
+//			}
+//		} else {
+//			if (pos.cpy().add(speed).sub(planet.pos).len() > planet.radius) {
+//			} else {
+//				pos.set(planet.pos.cpy().add(up.cpy().setLength(planet.radius)));
+//				speed.setZero();
+//				grounded = true;
+//			}
+//		}
+//			
+//		speed.add(move);
+//		pos.add(speed);
+//		move.setZero();
 		up.set(pos.cpy().sub(planet.pos));
 		dist = pos.cpy().sub(planet.pos).len() - planet.radius;
 		
@@ -66,6 +95,15 @@ public class Player {
 		Vector2 shadowPos = planet.pos.cpy().add(up.cpy().setLength(planet.radius - 8));
 		shadow.drawCentered(batch, shadowPos.x, shadowPos.y);
 		sprite.drawCentered(batch, pos.x, pos.y);
+	}
+	
+	public void gravitate(Planet planet) {
+		if (grounded) {
+			return;
+		}
+		Vector2 d = planet.pos.cpy().sub(pos);
+		float l = d.len();
+		move.add(d.scl(4 / l / l));
 	}
 	
 	public void switchPlanet(Planet planet) {

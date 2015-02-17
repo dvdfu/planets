@@ -35,7 +35,7 @@ public class MainGame extends ApplicationAdapter {
 		for (int i = 0; i < 10; i++) {
 			p = new Planet();
 			p.pos.set(MathUtils.random(-400, 400), MathUtils.random(-400, 400));
-			p.setRadius(MathUtils.random(30, 100));
+			p.setRadius(MathUtils.random(5, 60));
 			planets.add(p);
 		}
 		
@@ -48,7 +48,7 @@ public class MainGame extends ApplicationAdapter {
 		
 		e = new Environment();
 		e.set(new ColorAttribute(ColorAttribute.AmbientLight, 0, 0, 0, 1f));
-		e.add(new DirectionalLight().set(0.95f, 0.9f, 0.75f, -1.5f, -1f, -3f));
+		e.add(new DirectionalLight().set(1, 1, 0.9f, -1.5f, -1f, -1f));
 		e.add(new DirectionalLight().set(0.11f, 0.08f, 0.14f, 1.5f, 1.0f, 0.5f));
 		models = new ModelBatch();
 		
@@ -71,6 +71,7 @@ public class MainGame extends ApplicationAdapter {
 		Planet c = planets.get(0);
 		float d = Integer.MAX_VALUE;
 		for (Planet p : planets) {
+			player.gravitate(p);
 			if (p.distance(player) < d) {
 				d = p.distance(player);
 				c = p;

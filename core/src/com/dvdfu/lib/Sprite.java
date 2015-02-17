@@ -128,4 +128,12 @@ public class Sprite {
 	public float getAngle() {
 		return angle;
 	}
+	
+	public float getWidth() {
+		return width;
+	}
+	
+	public float getHeight() {
+		return height;
+	}
 }
