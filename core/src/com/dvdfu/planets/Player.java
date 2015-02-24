@@ -10,8 +10,9 @@ import com.dvdfu.lib.Sprite;
 public class Player {
 	Sprite sprite, shadow;
 	float dist;
-	Vector2 pos, speed, move, up;
+	Vector2 pos, vel, moveVel, acc, up;
 	boolean grounded;
+	boolean planeted;
 	Planet planet;
 	
 	public Player(Planet p) {
@@ -22,71 +23,71 @@ public class Player {
 		shadow.setOrigin(4, 2);
 		pos = new Vector2(400, 400);
 		planet = p;
-		speed = new Vector2();
+		vel = new Vector2();
+		moveVel = new Vector2();
 		up = new Vector2();
-		move = new Vector2();
+		acc = new Vector2();
 	}
 	
 	public void update() {
-//		up.set(pos.cpy().sub(planet.pos));
-//		dist = pos.cpy().sub(planet.pos).len() - planet.radius;
-//		
-//		if (grounded) {
-//			pos.set(planet.pos.cpy().add(up.cpy().setLength(planet.radius)));
-//			speed.setZero();
-//			
-//			if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-//				move.add(up.cpy().rotate(-90).setLength(2));
-//			} else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-//				move.add(up.cpy().rotate(90).setLength(2));
-//			}
-//			
-//			if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-//				speed.set(up.cpy().setLength(8));
-//				grounded = false;
-//			}
-//		} else {
-//			if (pos.cpy().add(speed).sub(planet.pos).len() > planet.radius) {
-//			} else {
-//				pos.set(planet.pos.cpy().add(up.cpy().setLength(planet.radius)));
-//				speed.setZero();
-//				grounded = true;
-//			}
-//		}
-//			
-//		speed.add(move);
-//		pos.add(speed);
-//		move.setZero();
+		
 		up.set(pos.cpy().sub(planet.pos));
-		dist = pos.cpy().sub(planet.pos).len() - planet.radius;
-		
-		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			move.x = MathUtils.lerp(move.x, 2, 0.1f);
-		} else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			move.x = MathUtils.lerp(move.x, -2, 0.1f);
+		moveVel.setZero();
+		if (planeted) {
+			planetState();
 		} else {
-			move.x = MathUtils.lerp(move.x, 0, 0.2f);
+			playerState();
 		}
-		
+		vel.add(acc);
+		pos.add(vel);
+		acc.setZero();
+	}
+	
+	public void playerState() {
 		if (grounded) {
 			pos.set(planet.pos.cpy().add(up.cpy().setLength(planet.radius)));
-			move.y = 0;
-			
-			if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-				move.y = 4;
+			vel.setZero();
+			if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+				moveVel.x = -2;
+			} else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+				moveVel.x = 2;
+			}
+			moveVel.rotate(up.angle() - 90);
+			pos.add(moveVel);
+			if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+				vel.set(up.cpy().setLength(8));
 				grounded = false;
 			}
+			if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+				planeted = true;
+			}
 		} else {
-			if (pos.cpy().add(speed).sub(planet.pos).len() > planet.radius) {
-				move.y -= 0.1f;
-			} else {
+			if (up.len() < planet.radius) {
 				pos.set(planet.pos.cpy().add(up.cpy().setLength(planet.radius)));
-				move.y = 0;
+				vel.setZero();
 				grounded = true;
 			}
 		}
-		speed.set(move.cpy().rotate(up.angle() - 90));
-		pos.add(speed);
+	}
+	
+	public void planetState() {
+		pos.set(planet.pos.cpy().add(up.cpy().setLength(planet.radius)));
+		vel.setZero();
+		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+			planet.setAngle(planet.angle + 1);
+			moveVel.x = -MathUtils.PI * planet.radius / 180;
+		} else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+			planet.setAngle(planet.angle - 1);
+			moveVel.x = MathUtils.PI * planet.radius / 180;
+		}
+		moveVel.rotate(up.angle() - 90);
+		pos.add(moveVel);
+		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+			planet.pos.add(up.cpy().setLength(6000 / planet.getMass()));
+		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+			planeted = false;
+		}
 	}
 	
 	public void draw(SpriteBatch batch) {
@@ -97,22 +98,23 @@ public class Player {
 		sprite.drawCentered(batch, pos.x, pos.y);
 	}
 	
+	public float planetDistance(Planet planet) {
+		return pos.cpy().sub(planet.pos).len() - planet.radius;
+	}
+	
 	public void gravitate(Planet planet) {
-		if (grounded) {
-			return;
-		}
-		Vector2 d = planet.pos.cpy().sub(pos);
-		float l = d.len();
-		move.add(d.scl(4 / l / l));
+		if (grounded || planeted) return;
+		Vector2 diff = planet.pos.cpy().sub(pos);
+		float length = diff.len2();
+		diff = diff.setLength(planet.getMass());
+		acc.add(diff.x / length, diff.y / length);
 	}
 	
 	public void switchPlanet(Planet planet) {
+		if (planeted) return;
 		if (this.planet.equals(planet)) {
 			return;
 		}
 		this.planet = planet;
-//		up.set(pos.cpy().sub(planet.pos));
-//		move.set(speed.cpy().rotate(up.angle() + 90));
-		move.rotate(up.angle() - pos.cpy().sub(planet.pos).angle());
 	}
 }
