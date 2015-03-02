@@ -23,7 +23,7 @@ public class Main extends Game {
 		fb = new FrameBuffer(Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
 		fb.getColorBufferTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
 		fbBatch = new SpriteBatch();
-		fbBatch.setShader(new Shader("shaders/pass.vsh", "shaders/pass.fsh"));
+		fbBatch.setShader(Consts.passShader);
 	}
 
 	public void enterScreen(AbstractScreen screen) {

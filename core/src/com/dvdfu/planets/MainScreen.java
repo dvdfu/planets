@@ -5,14 +5,12 @@ import java.util.ArrayList;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.dvdfu.lib.AbstractScreen;
 
 public class MainScreen extends AbstractScreen {
 	SpriteBatch batch;
-	ShapeRenderer shapes;
 	OrthographicCamera cam;
 	ArrayList<Planet> planets;
 	Player player;
@@ -21,14 +19,13 @@ public class MainScreen extends AbstractScreen {
 	public MainScreen(MainGame game) {
 		super(game);
 		batch = new SpriteBatch();
-		shapes = new ShapeRenderer();
 		planets = new ArrayList<Planet>();
 		
 		Planet p;
 		for (int i = 0; i < 10; i++) {
 			p = new Planet();
 			p.pos.set(MathUtils.random(-400, 400), MathUtils.random(-400, 400));
-			p.setRadius(MathUtils.random(30, 120));
+			p.setRadius(MathUtils.random(30, 160));
 			planets.add(p);
 		}
 		
@@ -45,9 +42,11 @@ public class MainScreen extends AbstractScreen {
 		cam.up.set(lerpAngle, 0);
 		cam.zoom = MathUtils.lerp(cam.zoom, player.planeted ? player.planet.radius / 50 + 1 : 1, 0.1f);
 		cam.update();
+		
 		float d = Integer.MAX_VALUE;
 		Planet nearest = player.planet;
 		for (Planet p : planets) {
+			p.update();
 			player.gravitate(p);
 			if (player.planetDistance(p) < d) {
 				d = player.planetDistance(p);
@@ -62,9 +61,11 @@ public class MainScreen extends AbstractScreen {
 		update(delta);
 		batch.setProjectionMatrix(cam.combined);
 		batch.begin();
+		batch.setShader(Consts.polarShader);
 		for (Planet p : planets) {
 			p.draw(batch);
 		}
+		batch.setShader(Consts.passShader);
 		player.draw(batch);
 		batch.end();
 	}

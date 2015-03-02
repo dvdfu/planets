@@ -3,7 +3,7 @@ package com.dvdfu.planets;
 import com.dvdfu.lib.Main;
 
 public class MainGame extends Main {
-	private final boolean SHADER_USED = false;
+	private final boolean SHADER_USED = true;
 	
 	public void create() {
 		super.create();

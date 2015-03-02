@@ -2,26 +2,34 @@ package com.dvdfu.planets;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.dvdfu.lib.Sprite;
 
 public class Planet {
-	Vector2 pos;
+	Vector2 pos, vel;
 	Sprite sprite;
-	float radius, density, angle;
+	float radius, density;
+	float angle, angularSpeed;
 	
 	public Planet() {
 		pos = new Vector2();
-		sprite = new Sprite(Consts.atlas.findRegion("circle"));
+		vel = new Vector2();
+		sprite = new Sprite(new TextureRegion(new Texture(Gdx.files.internal("img/planet.png"))));//Consts.atlas.findRegion("circle"));
 		density = 0.2f;
 		setRadius(10);
 	}
 	
-	public void setAngle(float angle) {
-		this.angle = angle;
+	public void update() {
+		angle += angularSpeed;
 		sprite.setAngle(angle);
+		angularSpeed = MathUtils.lerp(angularSpeed, 0, 0.1f);
+		pos.add(vel);
+		vel.lerp(Vector2.Zero, 0.01f);
 	}
 	
 	public void setRadius(float radius) {
