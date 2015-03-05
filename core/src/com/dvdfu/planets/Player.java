@@ -28,6 +28,7 @@ public class Player {
 		vel = new Vector2();
 		moveVel = new Vector2();
 		acc = new Vector2();
+		landOnPlanet(p);
 	}
 	
 	public void update() {
@@ -55,7 +56,7 @@ public class Player {
 				moveVel.x += 2;
 			}
 			if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-				vel.set(up().cpy().setLength(4));
+				vel.set(up().cpy().setLength(4)).add(ground.vel).add(moveVel.rotate(up().angle() - 90));
 				grounded = false;
 			}
 			if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && ground instanceof Planet) {
@@ -107,7 +108,7 @@ public class Player {
 	public void draw(SpriteBatch batch) {
 		sprite.setAngle(up().angle() - 90);
 		sprite.drawCentered(batch, pos.x, pos.y);
-		sprite.drawCentered(batch, ground.pos.x, ground.pos.y);
+		// sprite.drawCentered(batch, ground.pos.x, ground.pos.y);
 	}
 	
 	public float planetDistance(CelestialBody planet) {
@@ -116,7 +117,7 @@ public class Player {
 	
 	public void gravitate(CelestialBody body) {
 		if (grounded || planeted) return;
-		float length = 30 * upFrom(body).len2();
+		float length = upFrom(body).len2() * upFrom(body).len() / 10;
 		Vector2 mass = upFrom(body).setLength(body.getMass()).scl(-1);
 		acc.add(mass.x / length, mass.y / length);
 	}

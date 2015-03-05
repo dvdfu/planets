@@ -87,7 +87,7 @@ public class MainScreen extends AbstractScreen {
 		shapes.setProjectionMatrix(cam.combined);
 		shapes.begin(ShapeType.Line);
 		for (CelestialBody p : planets) {
-			p.drawShape(shapes);
+			// p.drawShape(shapes);
 		}
 		shapes.end();
 	}
