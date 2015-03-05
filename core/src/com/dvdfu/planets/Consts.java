@@ -19,5 +19,6 @@ public class Consts {
 		
 		passShader = new Shader("shaders/pass.vsh", "shaders/pass.fsh");
 		polarShader = new Shader("shaders/pass.vsh", "shaders/polar.fsh");
+		polarShader.setUniformf("resolution", 16, 32);
 	}
 }

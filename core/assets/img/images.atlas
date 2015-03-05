@@ -1,20 +1,27 @@
 
 images.png
-size: 256,256
+size: 64,32
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
 circle
   rotate: false
-  xy: 2, 20
-  size: 160, 160
-  orig: 160, 160
+  xy: 2, 2
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+grass_side
+  rotate: false
+  xy: 2, 12
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1
 player
   rotate: false
-  xy: 2, 2
-  size: 8, 16
-  orig: 8, 16
+  xy: 20, 12
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1

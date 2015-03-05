@@ -10,113 +10,119 @@ import com.dvdfu.lib.Sprite;
 public class Player {
 	Sprite sprite, shadow;
 	float dist;
-	Vector2 pos, vel, moveVel, acc, up;
+	float groundSpeed;
+	Vector2 pos, vel, moveVel, acc;
 	boolean grounded;
 	boolean planeted;
-	Planet planet, nearest;
+	CelestialBody ground, nearest;
 	
-	public Player(Planet p) {
+	public Player(CelestialBody p) {
 		sprite = new Sprite(Consts.atlas.findRegion("player"));
 		shadow = new Sprite(Consts.atlas.findRegion("player"));
 		shadow.setColor(0, 0, 0);
 		shadow.setSize(8, 4);
 		shadow.setOrigin(4, 2);
 		pos = new Vector2(400, 400);
-		planet = p;
+		ground = p;
 		nearest = p;
 		vel = new Vector2();
 		moveVel = new Vector2();
-		up = new Vector2();
 		acc = new Vector2();
 	}
 	
 	public void update() {
-		
-		up.set(pos.cpy().sub(planet.pos));
 		moveVel.setZero();
 		if (planeted) {
 			planetState();
 		} else {
 			playerState();
 		}
-		moveVel.x += -planet.radius * planet.angularSpeed * MathUtils.PI / 180;
-		moveVel.rotate(up.angle() - 90);
+		moveVel.rotate(up().angle() - 90);
 		pos.add(moveVel);
-		vel.add(acc);
-		pos.add(vel);
-		acc.setZero();
 	}
 	
-	public void playerState() {
+	private void playerState() {
+		vel.add(acc);
+		acc.setZero();
+		pos.add(vel);
 		if (grounded) {
-			pos.set(planet.pos.cpy().add(up.cpy().setLength(planet.radius)));
-			vel.setZero();
+			moveVel.x = -ground.radius * ground.angularSpeed * MathUtils.PI / 180;
+			landOnPlanet(nearest);
 			if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
 				moveVel.x -= 2;
-			} else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+			}
+			if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 				moveVel.x += 2;
 			}
 			if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-				vel.set(up.cpy().setLength(8));
+				vel.set(up().cpy().setLength(4));
 				grounded = false;
 			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+			if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && ground instanceof Planet) {
 				planeted = true;
 			}
 		} else {
-			if (up.cpy().add(vel).len() < planet.radius) {
-				pos.set(planet.pos.cpy().add(up.cpy().setLength(planet.radius)));
-				vel.setZero();
-				grounded = true;
+			if (planetDistance(nearest) < 0) {
+				landOnPlanet(nearest);
 			}
 		}
 	}
 	
-	public void planetState() {
-		pos.set(planet.pos.cpy().add(up.cpy().setLength(planet.radius)));
-		pos.add(planet.vel);
-		vel.setZero();
+	private void planetState() {
+		moveVel.x = -ground.radius * ground.angularSpeed * MathUtils.PI / 180;
+		landOnPlanet(nearest);
 		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			planet.angularSpeed = MathUtils.lerp(planet.angularSpeed, 3, 0.1f);
-		} else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			planet.angularSpeed = MathUtils.lerp(planet.angularSpeed, -3, 0.1f);
+			ground.angularSpeed += 0.1f;
 		}
-		pos.add(moveVel);
+		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+			ground.angularSpeed -= 0.1f;
+		}
 		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-			planet.vel.lerp(up.cpy().setLength(200 / planet.radius), 0.05f);
-		}else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-			planet.vel.lerp(up.cpy().setLength(200 / planet.radius).scl(-1), 0.05f);
+			Vector2 move = new Vector2(1, 0);
+			move.setLength(500 / ground.radius).setAngle(up().angle());
+			ground.vel.set(move);
 		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
 			planeted = false;
 		}
 	}
 	
+	public Vector2 up() {
+		return upFrom(ground);
+	}
+	
+	public Vector2 upFrom(CelestialBody body) {
+		return pos.cpy().sub(body.pos);
+	}
+	
+	public void landOnPlanet(CelestialBody body) {
+		Vector2 p = body.pos.cpy();
+		p.add(pos.cpy().sub(p).setLength(body.radius + 8));
+		pos.set(p);
+		vel.set(body.vel);
+		ground = body;
+		grounded = true;
+	}
+	
 	public void draw(SpriteBatch batch) {
-		sprite.setAngle(up.angle() - 90);
-//		shadow.setAngle(up.angle() - 90);
-//		Vector2 shadowPos = planet.pos.cpy().add(up.cpy().setLength(planet.radius - 8));
-//		shadow.drawCentered(batch, shadowPos.x, shadowPos.y);
-		sprite.drawCentered(batch, pos.x + up.cpy().setLength(8).x, pos.y + up.cpy().setLength(8).y);
+		sprite.setAngle(up().angle() - 90);
+		sprite.drawCentered(batch, pos.x, pos.y);
+		sprite.drawCentered(batch, ground.pos.x, ground.pos.y);
 	}
 	
-	public float planetDistance(Planet planet) {
-		return pos.cpy().sub(planet.pos).len() - planet.radius;
+	public float planetDistance(CelestialBody planet) {
+		return pos.cpy().add(vel).sub(planet.pos).len() - planet.radius - 8;
 	}
 	
-	public void gravitate(Planet planet) {
+	public void gravitate(CelestialBody body) {
 		if (grounded || planeted) return;
-		Vector2 diff = planet.pos.cpy().sub(pos);
-		float length = diff.len2();
-		diff = diff.setLength(planet.getMass());
-		acc.add(diff.x / length, diff.y / length);
+		float length = 30 * upFrom(body).len2();
+		Vector2 mass = upFrom(body).setLength(body.getMass()).scl(-1);
+		acc.add(mass.x / length, mass.y / length);
 	}
 	
-	public void switchPlanet(Planet planet) {
+	public void switchPlanet(CelestialBody planet) {
 		if (planeted) return;
 		nearest = planet;
-		if (planetDistance(nearest) < 0) {
-			this.planet = nearest;
-		}
 	}
 }
